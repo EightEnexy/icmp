@@ -71,6 +71,7 @@ int main(int argc,char*argv[]){
 
 				cout<<"f:"<<file_lenght<<endl;
 				//cout<<"act:"<<act_length<<endl;
+				memset(recv, 0, MAX_LENGHT);
 				c = icmp.read_packet(recv,act_length+20+sizeof(icmphdr));
 				cout<<c<<endl;
 				c-=20+sizeof(icmphdr);
@@ -79,7 +80,7 @@ int main(int argc,char*argv[]){
 
     			file_lenght -= c;
 
-				memset(recv, 0, MAX_LENGHT);
+				
 
 				icmp_file.write(recv+sizeof(icmphdr)+20,c);
 			
