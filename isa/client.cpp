@@ -2,15 +2,6 @@
 #include <cstring>
 #include <iostream>
 
-void *get_in_addr(struct sockaddr *sa)
-{
-	if (sa->sa_family == AF_INET)
-	{
-		return &(((struct sockaddr_in *)sa)->sin_addr);
-	}
-
-	return &(((struct sockaddr_in6 *)sa)->sin6_addr);
-}
 
 client::client(const std::string ip, const std::string f,const int ai_family,const int ai_socktype){
 	host = ip;
@@ -60,9 +51,30 @@ int client::send(int sock ,char * packet , size_t len){
 
 	return  sendto(sock, packet, len, 0, (struct sockaddr *)(res->ai_addr), res->ai_addrlen);
 	
-
 	
 } 
 const std::string client::get_ip_hostname(){return host.data();}
 
 const std::string client::get_file(){return file.data();}
+
+bool client::send_file(int sock,size_t length,char * buffer){
+	
+
+	std::string to_send = set_name(file);
+
+	std::string len = set_lenght(std::to_string(length));
+
+	to_send = to_send + len;
+
+   	strcpy(buffer + sizeof(icmphdr),to_send.data());
+
+	struct icmphdr *icmp_header = (struct icmphdr *)buffer;
+
+	icmp_header->code = ICMP_ECHO;
+	icmp_header->checksum = 0;
+
+	send(sock,buffer,sizeof(icmphdr) + to_send.size());
+	
+   
+	return true;
+}
