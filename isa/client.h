@@ -6,9 +6,12 @@
 #include <sys/socket.h>
 #include <arpa/inet.h>
 #include <netinet/ip_icmp.h>
+#include "protocol.h"
+#include <iostream>
+#include <fstream>
 
 
-class client{
+class client: public protocol {
 	
 	std::string host;
 	std::string file;
@@ -25,5 +28,6 @@ class client{
 	bool get_info();
 	int get_sock();
 	std::string get_ip();
+	bool send_file(int sock,size_t length,char * buffer);
 
 };

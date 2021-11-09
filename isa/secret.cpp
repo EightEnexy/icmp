@@ -4,7 +4,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <iostream>
+#include <fstream>
+#include <chrono>
+#include <thread>
 
+#include "server.h"
 #include "prog_parse.h"
 #include "client.h"
 
@@ -33,13 +38,6 @@ void err_msg(const int err_code){
 }
 
 
-std::tuple<const char *,const char *> prog_client(const int argc,char *argv[]){
-
-	return {argv[1],argv[2]};
-}
-
-
-
 int main(int argc,char*argv[]){
 
 	using namespace std;
@@ -49,9 +47,46 @@ int main(int argc,char*argv[]){
 	if (!prog.parse(argc,argv))
 		err_msg(arg);
 	
-		
 	if (argc == SERVER){
-		;
+
+			server icmp(socket(AF_INET,SOCK_RAW,IPPROTO_ICMP));
+
+
+			char recv[MAX_LENGHT];
+			
+			memset(recv, 0, MAX_LENGHT);
+
+
+			icmp.set_file_name(recv,MAX_LENGHT);
+
+			ofstream icmp_file("k"+icmp.get_file_name(),ifstream::binary);
+
+
+			size_t file_lenght = icmp.get_file_lenght();
+
+			
+			int act_length= (file_lenght > MAX_LENGHT-sizeof(icmphdr)-20)? MAX_LENGHT - sizeof(icmphdr) -20 : file_lenght;
+			int c;
+			while(file_lenght > 0){
+
+				cout<<"f:"<<file_lenght<<endl;
+				//cout<<"act:"<<act_length<<endl;
+				c = icmp.read_packet(recv,act_length+20+sizeof(icmphdr));
+				cout<<c<<endl;
+				c-=20+sizeof(icmphdr);
+
+				act_length = (file_lenght > MAX_LENGHT-sizeof(icmphdr)-20)? MAX_LENGHT - sizeof(icmphdr) -20 : file_lenght;
+
+    			file_lenght -= c;
+
+				memset(recv, 0, MAX_LENGHT);
+
+				icmp_file.write(recv+sizeof(icmphdr)+20,c);
+			
+			}
+			
+			icmp_file.close();
+			
 	}
 	else{
 		
@@ -59,70 +94,54 @@ int main(int argc,char*argv[]){
 		
 		if (!icmp.get_info())
 			err_msg(cl);
-
-		cout<<icmp.get_ip()<<endl;
 		
+		icmp.get_ip();
 		int sock;
+
 		if((sock = icmp.get_sock()) == -1)
 			err_msg(cl);
-
-		char packet[1500];
-		char data[] = "OMEGALUL";
-		int datalen = 10;
-
-		memset(&packet, 0, 1500);
-
-		struct icmphdr *icmp_header = (struct icmphdr *)packet;
-
-		icmp_header->code = ICMP_ECHO;
-		icmp_header->checksum = 0;
-
-		memcpy(packet + sizeof(struct icmphdr), data, datalen);
-
-		icmp.send(sock,packet,sizeof(struct icmphdr) + datalen);
 		
-	}
+		
+		ifstream icmp_file(icmp.get_file(),	ifstream::binary);
+
+	
+		icmp_file.seekg (0, icmp_file.end);
+    	size_t length = icmp_file.tellg();
+    	icmp_file.seekg (0, icmp_file.beg);
+
+    	char buffer[MAX_LENGHT];
+
+    	icmp.send_file(sock,length,buffer);
+
+    	int act_length;
+    	
+   			while(length){
+
+    		act_length = (length > MAX_LENGHT-sizeof(icmphdr)-20)? MAX_LENGHT - sizeof(icmphdr) -20 : length;
+
+    		length -= act_length;
+    		//cout<<act_length;
+    		icmp_file.read(buffer + sizeof(icmphdr),act_length);
+
+			struct icmphdr *icmp_header = (struct icmphdr *)buffer;
+			//cout<<sizeof(struct icmphdr *)<<endl<<sizeof(icmphdr);
+
+			icmp_header->code = ICMP_ECHO;
+			icmp_header->checksum = 0;
+			cout<<(sizeof(icmphdr)+act_length)<<endl;
+			icmp.send(sock,buffer,sizeof(icmphdr)+act_length);
+
+
+
+		}
+	
 	
 
-	/*
+    	
 
-
-
-
-
-	// MAXDATALEN = MTU(1500B) - zvyšna velkost čo si spotreboval :)
-
-	if (sendto(sock, packet, sizeof(struct icmphdr) + datalen, 0, (struct sockaddr *)(serverinfo->ai_addr), serverinfo->ai_addrlen) < 0)
-	{
-		fprintf(stderr, "sendto err :)\n");
-		return 1;
+    	
+    	
 	}
-
-	// //šifrovanie
-
-	const unsigned char cyphertext[] = "Monntegea";
-	int cyphertextlen = 10;
-
-	AES_KEY key_e;
-	AES_KEY key_d;
-	AES_set_encrypt_key((const unsigned char *)"xlogin00", 128, &key_e);
-	AES_set_decrypt_key((const unsigned char *)"xlogin00", 128, &key_d);
-
-	unsigned char *output = (unsigned char *)calloc(cyphertextlen + (AES_BLOCK_SIZE % cyphertextlen), 1);
-
-	AES_encrypt(cyphertext, output, &key_e);
-
-	printf("encrypted: ");
-	for (int i = 0; i < AES_BLOCK_SIZE; ++i)
-	{
-		printf("%X ", output[i]);
-	}
-	printf("\n");
-
-	AES_decrypt(output, output, &key_d);
-
-	printf("decrypted: %s\n", output);
-
-	return 0;
-	*/
+	
+			
 }
