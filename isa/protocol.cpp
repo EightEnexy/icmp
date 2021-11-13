@@ -17,3 +17,32 @@ char * protocol::set_lenght(std::string lenght){
 	lenght = LENGHT + lenght + "\n";
 	return lenght.data();
 }
+
+void protocol::set_encrypt_key(){
+
+	AES_set_encrypt_key((unsigned char *)key, bit_size, &encrypt);
+}
+
+void protocol::set_decrypt_key(){
+	AES_set_decrypt_key((unsigned char *)key, bit_size, &decrypt);
+}
+
+void protocol::encrypt_data(int size,char *const buffer){
+
+	unsigned char * encrypt_data = reinterpret_cast<unsigned char *>(buffer);
+	
+	for(int i = 0; i < ((size%AES_BLOCK_SIZE)? (size/AES_BLOCK_SIZE)+1 : (size/AES_BLOCK_SIZE)) ;i++){
+			AES_encrypt(encrypt_data,encrypt_data, &encrypt);
+			encrypt_data+=AES_BLOCK_SIZE;
+		}
+	
+}
+void protocol::decrypt_data(int size,char * buffer){
+	
+	unsigned char * dencrypt_data = reinterpret_cast<unsigned char *>(buffer);
+		
+	for(int i = 0; i < ((size%AES_BLOCK_SIZE)? (size/AES_BLOCK_SIZE)+1 : (size/AES_BLOCK_SIZE)) ;i++){
+		AES_decrypt(dencrypt_data,dencrypt_data, &decrypt);
+		dencrypt_data+=AES_BLOCK_SIZE;
+	}
+}

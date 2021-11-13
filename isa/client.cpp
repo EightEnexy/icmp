@@ -57,9 +57,8 @@ const std::string client::get_ip_hostname(){return host.data();}
 
 const std::string client::get_file(){return file.data();}
 
-bool client::send_file(int sock,size_t length,char * buffer){
+bool client::send_file_data(int sock,size_t length,char * buffer){
 	
-
 	std::string to_send = set_name(file);
 
 	std::string len = set_lenght(std::to_string(length));
@@ -68,13 +67,12 @@ bool client::send_file(int sock,size_t length,char * buffer){
 
    	strcpy(buffer + sizeof(icmphdr),to_send.data());
 
-	struct icmphdr *icmp_header = (struct icmphdr *)buffer;
-
-	icmp_header->code = ICMP_ECHO;
-	icmp_header->checksum = 0;
+	((struct icmphdr *)buffer)->code = ICMP_ECHO;
 
 	send(sock,buffer,sizeof(icmphdr) + to_send.size());
-	
+
+
+	memset(buffer, 0, MAX_LENGHT);
    
 	return true;
 }

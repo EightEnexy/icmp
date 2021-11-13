@@ -1,5 +1,5 @@
-CPPFLAGS = -g -std=c++17  -fpermissive -Wall -Wextra
-COMPILE = g++ $(CPPFLAGS)
+CPPFLAGS = -g -std=c++17 -O3 -fpermissive -Wall -Wextra 
+COMPILE = g++ $(CPPFLAGS) -lcrypto
 
 secret:	secret.o client.o prog_parse.o server.o protocol.o
 	$(COMPILE) $^ -o $@
@@ -19,6 +19,6 @@ protocol.o: protocol.cpp protocol.h
 prog_parse.o: prog_parse.cpp prog_parse.h
 	$(COMPILE) -c $<
 
-
+#-fsanitize=address
 clean:
 	rm -f *.o

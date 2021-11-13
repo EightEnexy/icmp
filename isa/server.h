@@ -12,14 +12,16 @@
 
 class server: public protocol {
 
+	
 	std::string file_name;
 	int file_lenght;
 	int sock;
-	struct sockaddr_in addr;
+	int sock2;
+	struct sockaddr_in  addr;
 	socklen_t addr_len = sizeof(struct sockaddr_in);
 
 	public:
-		server(int sock);
+		server(int sock,int sock2);
 		int get_sock(){return sock;};
 		int get_file_lenght(){return file_lenght;};
 		std::string get_file_name(){return file_name;};

@@ -21,6 +21,7 @@ class client: public protocol {
 	struct addrinfo hints;
     struct addrinfo *res;
 	public:
+	void free_addr(){freeaddrinfo(res);};
 	int send(int sock , char * packet , size_t len);
 	client(const std::string ip, const std::string f,const int ai_family,const int ai_socktype);
 	const std::string  get_ip_hostname();
@@ -28,6 +29,6 @@ class client: public protocol {
 	bool get_info();
 	int get_sock();
 	std::string get_ip();
-	bool send_file(int sock,size_t length,char * buffer);
+	bool send_file_data(int sock,size_t length,char * buffer);
 
 };
