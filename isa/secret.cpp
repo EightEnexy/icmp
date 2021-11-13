@@ -17,8 +17,6 @@
 #define SERVER 2
 
 
-
-
 enum err {arg=1,cl};
 
 void err_msg(const int err_code){
@@ -48,7 +46,7 @@ int main(int argc,char*argv[]){
 	
 	if (argc == SERVER){
 
-		server icmp(socket(AF_INET,SOCK_RAW,IPPROTO_ICMP),socket(AF_INET,SOCK_RAW,IPPROTO_ICMPV6));
+		server icmp;
 
 		char recv[MAX_LENGHT];
 	
@@ -61,18 +59,20 @@ int main(int argc,char*argv[]){
 		size_t file_lenght = icmp.get_file_lenght();
 
 		icmp.set_decrypt_key();
-		
+
+		size_t icmp_ip_hdr = icmp.get_ihl() + sizeof(icmphdr);
+
 		while(file_lenght){
 
 			int file_packet = icmp.read_packet(recv,(file_lenght > MAX_LENGHT-OFFSET)? MAX_LENGHT : file_lenght + OFFSET);
-			file_packet -= ICMPHDR;
+			file_packet -= icmp_ip_hdr;
 			file_packet -= (AES_BLOCK_SIZE-(((file_lenght > MAX_LENGHT-OFFSET)? MAX_LENGHT - OFFSET : file_lenght)%AES_BLOCK_SIZE));
     		file_lenght -= file_packet;
 
     		
-			icmp.decrypt_data(file_packet,recv+ICMPHDR);
-			icmp_file.write(recv+ICMPHDR,file_packet);
-			
+			icmp.decrypt_data(file_packet,recv+icmp_ip_hdr);
+			icmp_file.write(recv + icmp_ip_hdr,file_packet);
+		 	
 		}
 		
 		icmp_file.close();
@@ -82,10 +82,11 @@ int main(int argc,char*argv[]){
 		
 		client icmp(prog.get_arg_by_key(IP_HOSTNAME),prog.get_arg_by_key(FILE),AF_UNSPEC,SOCK_RAW);
 		
-		if (!icmp.get_info())
+		if(!icmp.get_info())
 			err_msg(cl);
 		
 		icmp.get_ip();
+
 		int sock;
 
 		if((sock = icmp.get_sock()) == -1)
@@ -129,13 +130,15 @@ int main(int argc,char*argv[]){
     		file_length -= file_packet;
 
     		icmp_file.read(buffer + sizeof(icmphdr),file_packet);
+
     		icmp.encrypt_data(file_packet,buffer + sizeof(icmphdr));
+
 			((struct icmphdr *)buffer)->code = ICMP_ECHO;
 			
 			icmp.send(sock,buffer,file_packet+sizeof(icmphdr)+(AES_BLOCK_SIZE-(file_packet%AES_BLOCK_SIZE)));
 			
 				
-			}
+		}
 			
 
 			/*

@@ -4,7 +4,7 @@
 #pragma once
 #define MAX_LENGHT 1500
 #define OFFSET 100
-#define ICMPHDR 28
+
 
 class protocol {
 	public:

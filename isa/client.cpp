@@ -36,7 +36,6 @@ std::string client::get_ip(){
 	else
 		icmp_protocol = IPPROTO_ICMPV6;
 
-	
 	inet_ntop(res->ai_family,ipv, ip, sizeof(ip));
 	return ip;
 }

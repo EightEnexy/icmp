@@ -17,7 +17,7 @@ class client: public protocol {
 	std::string file;
 	int icmp_protocol;
 
-	char ip [32];
+	char ip[32];
 	struct addrinfo hints;
     struct addrinfo *res;
 	public:

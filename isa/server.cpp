@@ -3,16 +3,31 @@
 #include <vector>
 #include <bits/stdc++.h>
 
+int server::first_read(int sock,int sock2,char * recv,size_t size){
+	
+	socks[0].fd = sock2;
+	socks[0].events = POLLIN;
 
-server::server(int sock,int sock2){
-	this->sock = sock;
-	this->sock2 = sock2;	
+	socks[1].fd = sock;
+	socks[1].events = POLLIN;
+
+	poll(socks,2,-1);
+
+	if(socks[1].revents & POLLIN)
+		this->sock = sock;
+
+	if(socks[0].revents & POLLIN)
+		this->sock = sock2;
+
+	return recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
 }
 
 int server::read_packet(char * recv,size_t size){
 
+
 	file_lenght = recvfrom(sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
-	
+
+	return file_lenght;
 	/*//TODO
 	char buffer[31];
 
@@ -28,18 +43,21 @@ int server::read_packet(char * recv,size_t size){
 
     std::cout<<file_lenght<<std::endl;
     */
-	return file_lenght;
 }
 
 bool server::set_file_name(char * recv , size_t size){
 	
-	int len = read_packet(recv,size);
+	int len = first_read(socket(AF_INET,SOCK_RAW,IPPROTO_ICMP),socket(AF_INET6,SOCK_RAW,IPPROTO_ICMPV6),recv,size);
+
+	ihl = (recv[0] & 0x0F)*4; 
 
 	if (len < 0)
 		return false;
 
-	std::string str = (recv + ICMPHDR);
-      
+    //std::cout<<len<<std::flush;
+
+	std::string str = (recv + ihl + sizeof(icmphdr));
+	
     std::vector <std::string> tokens;
       
     std::stringstream select(str);
@@ -64,8 +82,6 @@ bool server::set_file_name(char * recv , size_t size){
     file_name = tokens[1];
     
     file_lenght = stoi(tokens[3]);
-
-
 
 	return true;
 }
