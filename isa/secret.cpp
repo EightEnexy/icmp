@@ -7,7 +7,6 @@
 #include <iostream>
 #include <fstream>
 
-
 #include "server.h"
 #include "prog_parse.h"
 #include "client.h"
@@ -17,7 +16,7 @@
 #define SERVER 2
 
 
-enum err {arg=1,cl};
+enum err {arg=1,cl,sr};
 
 void err_msg(const int err_code){
 	
@@ -30,7 +29,9 @@ void err_msg(const int err_code){
 		case cl:
 			std::cerr << "client err" << std::endl;
 			exit(err_code);
-
+		case sr:
+			std::cerr << "server err" << std::endl;
+			exit(err_code);
 	}
 }
 
@@ -61,6 +62,7 @@ int main(int argc,char*argv[]){
 		icmp.set_decrypt_key();
 
 		size_t icmp_ip_hdr = icmp.get_ihl() + sizeof(icmphdr);
+	
 
 		while(file_lenght){
 
@@ -69,7 +71,6 @@ int main(int argc,char*argv[]){
 			file_packet -= (AES_BLOCK_SIZE-(((file_lenght > MAX_LENGHT-OFFSET)? MAX_LENGHT - OFFSET : file_lenght)%AES_BLOCK_SIZE));
     		file_lenght -= file_packet;
 
-    		
 			icmp.decrypt_data(file_packet,recv+icmp_ip_hdr);
 			icmp_file.write(recv + icmp_ip_hdr,file_packet);
 		 	
@@ -108,18 +109,6 @@ int main(int argc,char*argv[]){
 
     	icmp.send_file_data(sock,file_length,buffer);    	
     	
-		
-		//cout<<buffer;
-	
-    	/*
-    	char OK[1500];
-    	memset(OK, 0, 1500);
-    	
-    	struct sockaddr_in  addr;
-		socklen_t addr_len = sizeof(struct sockaddr_in);
-
-    	int sock2 = socket(AF_INET,SOCK_RAW,IPPROTO_ICMP);
-    	*/
 
    		while(file_length){
 
@@ -136,25 +125,9 @@ int main(int argc,char*argv[]){
 			((struct icmphdr *)buffer)->code = ICMP_ECHO;
 			
 			icmp.send(sock,buffer,file_packet+sizeof(icmphdr)+(AES_BLOCK_SIZE-(file_packet%AES_BLOCK_SIZE)));
-			
 				
 		}
 			
-
-			/*
-			recvfrom(socket(AF_INET,SOCK_RAW,IPPROTO_ICMP),OK, sizeof(OK), 0,(sockaddr *)&addr, &addr_len);
-			
-			string server_msg;
-
-			if(!(OK[28]=='O' && OK[29]=='K'))
-				err_msg(cl);
-
-			memset(OK, 0, 31);
-			*/			
-			
-
-		
-    	
     	icmp.free_addr();
 	}
 

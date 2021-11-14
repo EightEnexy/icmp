@@ -12,41 +12,30 @@ int server::first_read(int sock,int sock2,char * recv,size_t size){
 	socks[1].events = POLLIN;
 
 	poll(socks,2,-1);
+	int lenght = 0;
 
 	if(socks[1].revents & POLLIN){
-		ihl = (recv[0] & 0x0F)*4;
 		this->sock = sock;
+		lenght = recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
+		ihl = (recv[0] & 0x0F)*4;
 	}
 
 	if(socks[0].revents & POLLIN){
-		ihl = 0;
 		this->sock = sock2;
+		lenght = recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
+		ihl = 0;
+		
 	}
+	
+	return lenght;
 
-	return recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
 }
 
 int server::read_packet(char * recv,size_t size){
 
-
 	file_lenght = recvfrom(sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
 
 	return file_lenght;
-	/*//TODO
-	char buffer[31];
-
-	memset(buffer, 0, 31);
-
-	struct icmphdr *icmp_header = (struct icmphdr *)buffer;
-	icmp_header->code = ICMP_ECHO;
-
-	
-	strcpy(buffer + sizeof(icmphdr),"OK");
-	
-    sendto(sock2, buffer, sizeof(buffer), 0,(struct sockaddr *)&addr, sizeof(addr));
-
-    std::cout<<file_lenght<<std::endl;
-    */
 }
 
 bool server::set_file_name(char * recv , size_t size){
@@ -55,7 +44,7 @@ bool server::set_file_name(char * recv , size_t size){
 
 	if (len < 0)
 		return false;
-
+	
 	std::string str = (recv + ihl + sizeof(icmphdr));
 	
     std::vector <std::string> tokens;

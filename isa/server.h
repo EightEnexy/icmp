@@ -8,8 +8,7 @@
 #include <sys/poll.h>
 #include "protocol.h"
 #include <netinet/ip_icmp.h>
-
-
+#define IPV4_6 2
 
 class server: public protocol {
 
@@ -17,7 +16,7 @@ class server: public protocol {
 	std::string file_name;
 	int file_lenght;
 	int sock;
-	struct pollfd socks[2];
+	struct pollfd socks[IPV4_6];
 	struct sockaddr_in  addr;
 	int protocol;
 	unsigned ihl;

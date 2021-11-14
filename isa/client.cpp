@@ -2,7 +2,6 @@
 #include <cstring>
 #include <iostream>
 
-
 client::client(const std::string ip, const std::string f,const int ai_family,const int ai_socktype){
 	host = ip;
 	file = f;
@@ -12,7 +11,6 @@ client::client(const std::string ip, const std::string f,const int ai_family,con
 }
 
 bool client::get_info(){
-
 
 	if ((getaddrinfo(host.data(), NULL, &hints, &res)) != 0)
 	{
@@ -36,6 +34,7 @@ std::string client::get_ip(){
 		icmp_protocol = IPPROTO_ICMPV6;
 
 	inet_ntop(res->ai_family,ipv, ip, sizeof(ip));
+	
 	return ip;
 }
 
@@ -47,8 +46,7 @@ int client::get_sock(){
 
 int client::send(int sock ,char * packet , size_t len){
 
-	return  sendto(sock, packet, len, 0, (struct sockaddr *)(res->ai_addr), res->ai_addrlen);
-	
+	return  sendto(sock, packet, len, 0, (struct sockaddr *)(res->ai_addr), res->ai_addrlen);	
 	
 } 
 const std::string client::get_ip_hostname(){return host.data();}

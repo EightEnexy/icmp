@@ -19,6 +19,5 @@ protocol.o: protocol.cpp protocol.h
 prog_parse.o: prog_parse.cpp prog_parse.h
 	$(COMPILE) -c $<
 
-#-fsanitize=address
 clean:
 	rm -f *.o
