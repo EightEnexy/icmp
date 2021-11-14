@@ -13,11 +13,15 @@ int server::first_read(int sock,int sock2,char * recv,size_t size){
 
 	poll(socks,2,-1);
 
-	if(socks[1].revents & POLLIN)
+	if(socks[1].revents & POLLIN){
+		ihl = (recv[0] & 0x0F)*4;
 		this->sock = sock;
+	}
 
-	if(socks[0].revents & POLLIN)
+	if(socks[0].revents & POLLIN){
+		ihl = 0;
 		this->sock = sock2;
+	}
 
 	return recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
 }
@@ -49,12 +53,8 @@ bool server::set_file_name(char * recv , size_t size){
 	
 	int len = first_read(socket(AF_INET,SOCK_RAW,IPPROTO_ICMP),socket(AF_INET6,SOCK_RAW,IPPROTO_ICMPV6),recv,size);
 
-	ihl = (recv[0] & 0x0F)*4; 
-
 	if (len < 0)
 		return false;
-
-    //std::cout<<len<<std::flush;
 
 	std::string str = (recv + ihl + sizeof(icmphdr));
 	
@@ -72,7 +72,7 @@ bool server::set_file_name(char * recv , size_t size){
       
     if(tokens.size() != 4 )
     	return false;
-
+    
     if(check_name(tokens[0]))
     	return false;
 

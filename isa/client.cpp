@@ -23,7 +23,6 @@ bool client::get_info(){
 }
 
 std::string client::get_ip(){
-	
 
 	struct sockaddr * addr = res->ai_addr;
 
@@ -69,7 +68,6 @@ bool client::send_file_data(int sock,size_t length,char * buffer){
 	((struct icmphdr *)buffer)->code = ICMP_ECHO;
 
 	send(sock,buffer,sizeof(icmphdr) + to_send.size());
-
 
 	memset(buffer, 0, MAX_LENGHT);
    
