@@ -44,7 +44,6 @@ int main(int argc,char*argv[]){
 
 	if (!prog.parse(argc,argv))
 		err_msg(arg);
-	
 
 	if (argc == SERVER){
 		
@@ -57,7 +56,7 @@ int main(int argc,char*argv[]){
 		
 		while(!icmp.set_file_name(recv,MAX_LENGHT)); //looking for packet with file metadata 
 
-		ofstream icmp_file("M"+icmp.get_file_name(),ifstream::binary); 
+		ofstream icmp_file(icmp.get_file_name(),ifstream::binary); 
 
 		size_t file_lenght = icmp.get_file_lenght();
 

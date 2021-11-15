@@ -56,7 +56,6 @@ bool server::set_file_name(char * recv , size_t size){
    
     while(select >> token)
     {	
-    	std::cout<<token<<std::flush;
         tokens.push_back(token);
     }
       
