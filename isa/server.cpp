@@ -4,27 +4,26 @@
 #include <bits/stdc++.h>
 
 int server::first_read(int sock,int sock2,char * recv,size_t size){
-	
+	// choosing sockets 
 	socks[0].fd = sock2;
 	socks[0].events = POLLIN;
 
 	socks[1].fd = sock;
 	socks[1].events = POLLIN;
-
+		
 	poll(socks,2,-1);
 	int lenght = 0;
 
 	if(socks[1].revents & POLLIN){
 		this->sock = sock;
 		lenght = recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
-		ihl = (recv[0] & 0x0F)*4;
+		this->ihl = (recv[0] & 0x0F)*4;
 	}
 
 	if(socks[0].revents & POLLIN){
 		this->sock = sock2;
 		lenght = recvfrom(this->sock,recv, size, 0,(sockaddr *)&addr, &addr_len);
-		ihl = 0;
-		
+		this->ihl = 0;
 	}
 	
 	return lenght;
@@ -44,7 +43,8 @@ bool server::set_file_name(char * recv , size_t size){
 
 	if (len < 0)
 		return false;
-	
+		
+	// tokenizing strings 
 	std::string str = (recv + ihl + sizeof(icmphdr));
 	
     std::vector <std::string> tokens;
@@ -54,7 +54,7 @@ bool server::set_file_name(char * recv , size_t size){
     std::string token;
       
    
-    while(getline(select, token,'\n'))
+    while(select >> token)
     {
         tokens.push_back(token);
     }

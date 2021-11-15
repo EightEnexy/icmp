@@ -18,6 +18,22 @@ char * protocol::set_lenght(std::string lenght){
 	return lenght.data();
 }
 
+void protocol::set_pn(const unsigned long pn,char * buffer){
+
+	std::string str_pn = PN + std::to_string(pn);
+    memcpy(buffer,str_pn.data(),PACKET_MARK);
+
+}
+
+bool protocol::check_pn(const unsigned long pn,char * recv){
+
+	std::string str_pn = PN + std::to_string(pn);
+	if(!memcmp(recv,str_pn.data(),str_pn.size()))
+		return true;
+
+	return false;
+
+}
 void protocol::set_encrypt_key(){
 
 	AES_set_encrypt_key((unsigned char *)key, bit_size, &encrypt);
