@@ -47,13 +47,14 @@ int main(int argc,char*argv[]){
 	
 
 	if (argc == SERVER){
-
+		
+		while(1){
 		server icmp;
 
 		char recv[MAX_LENGHT];
 	
 		memset(recv, 0, MAX_LENGHT);
-	
+		
 		while(!icmp.set_file_name(recv,MAX_LENGHT)); //looking for packet with file metadata 
 
 		ofstream icmp_file("M"+icmp.get_file_name(),ifstream::binary); 
@@ -89,7 +90,9 @@ int main(int argc,char*argv[]){
 		}
 		
 		icmp_file.close();
-			
+
+	}
+
 	}
 	else{
 		
